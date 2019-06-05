@@ -21,8 +21,8 @@ const validate = (params) => {
     nameValidator.validate(),
     usernameValidator.validate(),
     mailValidator.validate(),
-    passwordValidator.validate()]
-  )
+    passwordValidator.validate()
+  ])
 }
 
 const removeErrors = () => {
@@ -43,23 +43,29 @@ const addErrorMessage = (type, message) => {
   input.insertAdjacentHTML('afterend', `<div class="invalid-feedback">${message}</div>`);
 }
 
-const signup = (params) => {
-  return fetch(`${endpoint}/signup`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json; charset=utf-8',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(params)
-  })
-  .then((res) => {
+const signup = async (params) => {
+  try {
+    const res = await fetch(`${endpoint}/signup`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json; charset=utf-8',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params)
+    })
     const json = res.json();
     if (res.status === 200) { // 登録成功
       return json
     } else { // 登録失敗
       return Promise.reject(new Error('ユーザー登録失敗'))
     }
-  })
+  } catch (e) {
+    if (e.name === 'TypeError') {
+      return Promise.reject(new Error('データを取得出来ませんでした。'))
+    } else {
+      return Promise.reject(e)
+    }
+  }
 }
 
 const onSubmit = async () => {
@@ -80,7 +86,7 @@ const onSubmit = async () => {
   }
   const results = await validate(params);
   if (
-    results[0].success && 
+    results[0].success &&
     results[1].success &&
     results[2].success &&
     results[3].success) {
@@ -94,7 +100,7 @@ const onSubmit = async () => {
   } else {
     results.forEach((result) => {
       if (!result.success) addErrorMessage(result.type, result.message);
-    }) 
+    })
   }
 }
 
